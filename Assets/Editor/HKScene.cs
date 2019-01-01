@@ -103,7 +103,6 @@ public class HKScene
         //}
 
         byte[] bundleData = Loader.CreateBundleFromLevel(am, assetsFileInstance);
-        File.WriteAllBytes(@"C:\Users\karse\Documents\HKEdit\test.unity3d", bundleData);
         EditorUtility.DisplayProgressBar("HKEdit", "Loading bundle", 1);
         bundle = AssetBundle.LoadFromMemory(bundleData);
         EditorUtility.DisplayProgressBar("HKEdit", "Loading scene", 1);
