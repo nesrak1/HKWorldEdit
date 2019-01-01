@@ -1,0 +1,143 @@
+0 TagManager Base
+ 0 vector tags
+  0 Array Array (32 items)
+   0 int size = 32
+   [0]
+    1 string data = "TileMap"
+   [1]
+    1 string data = "GameManager"
+   [2]
+    1 string data = "BlackOverlay"
+   [3]
+    1 string data = "HeroBox"
+   [4]
+    1 string data = "Nail Attack"
+   [5]
+    1 string data = "RespawnPoint"
+   [6]
+    1 string data = "HeroWalkable"
+   [7]
+    1 string data = "SceneManager"
+   [8]
+    1 string data = "HeroLight"
+   [9]
+    1 string data = "Battle Gate"
+   [10]
+    1 string data = "Battle Scene"
+   [11]
+    1 string data = "CameraParent"
+   [12]
+    1 string data = "Terrain"
+   [13]
+    1 string data = "Canvas"
+   [14]
+    1 string data = "UIManager"
+   [15]
+    1 string data = "Hero Spell"
+   [16]
+    1 string data = "Enemy Message"
+   [17]
+    1 string data = "Orb Target"
+   [18]
+    1 string data = "Vignette"
+   [19]
+    1 string data = "RespawnTrigger"
+   [20]
+    1 string data = "Boss Corpse"
+   [21]
+    1 string data = "Heart Piece"
+   [22]
+    1 string data = "TransitionGate"
+   [23]
+    1 string data = "UI Soul Orb"
+   [24]
+    1 string data = "Shade Marker"
+   [25]
+    1 string data = "Hud Camera"
+   [26]
+    1 string data = "Cinematic"
+   [27]
+    1 string data = "Roar"
+   [28]
+    1 string data = "Stag Grate"
+   [29]
+    1 string data = "Platform"
+   [30]
+    1 string data = "Boss"
+   [31]
+    1 string data = "GeoCounter"
+ 0 vector layers
+  0 Array Array (32 items)
+   0 int size = 32
+   [0]
+    1 string data = "Default"
+   [1]
+    1 string data = "TransparentFX"
+   [2]
+    1 string data = "Ignore Raycast"
+   [3]
+    1 string data = ""
+   [4]
+    1 string data = "Water"
+   [5]
+    1 string data = "UI"
+   [6]
+    1 string data = ""
+   [7]
+    1 string data = ""
+   [8]
+    1 string data = ""
+   [9]
+    1 string data = ""
+   [10]
+    1 string data = ""
+   [11]
+    1 string data = ""
+   [12]
+    1 string data = ""
+   [13]
+    1 string data = ""
+   [14]
+    1 string data = ""
+   [15]
+    1 string data = ""
+   [16]
+    1 string data = ""
+   [17]
+    1 string data = ""
+   [18]
+    1 string data = ""
+   [19]
+    1 string data = ""
+   [20]
+    1 string data = ""
+   [21]
+    1 string data = ""
+   [22]
+    1 string data = ""
+   [23]
+    1 string data = ""
+   [24]
+    1 string data = ""
+   [25]
+    1 string data = ""
+   [26]
+    1 string data = ""
+   [27]
+    1 string data = ""
+   [28]
+    1 string data = ""
+   [29]
+    1 string data = ""
+   [30]
+    1 string data = ""
+   [31]
+    1 string data = ""
+ 0 vector m_SortingLayers
+  0 Array Array (1 items)
+   0 int size = 1
+   [0]
+    0 SortingLayerEntry data
+     1 string name = "Default"
+     0 unsigned int uniqueID = 0
+     1 bool locked = false

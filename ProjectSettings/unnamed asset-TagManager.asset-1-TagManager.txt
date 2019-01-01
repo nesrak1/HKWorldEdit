@@ -1,0 +1,290 @@
+0 TagManager Base
+ 0 vector tags
+  0 Array Array (73 items)
+   0 int size = 73
+   [0]
+    1 string data = "TileMap"
+   [1]
+    1 string data = "GameManager"
+   [2]
+    1 string data = "BlackOverlay"
+   [3]
+    1 string data = "HeroBox"
+   [4]
+    1 string data = "Nail Attack"
+   [5]
+    1 string data = "RespawnPoint"
+   [6]
+    1 string data = "HeroWalkable"
+   [7]
+    1 string data = "SceneManager"
+   [8]
+    1 string data = "HeroLight"
+   [9]
+    1 string data = "Battle Gate"
+   [10]
+    1 string data = "Battle Scene"
+   [11]
+    1 string data = "CameraParent"
+   [12]
+    1 string data = "Terrain"
+   [13]
+    1 string data = "Canvas"
+   [14]
+    1 string data = "UIManager"
+   [15]
+    1 string data = "Hero Spell"
+   [16]
+    1 string data = "Enemy Message"
+   [17]
+    1 string data = "Orb Target"
+   [18]
+    1 string data = "Vignette"
+   [19]
+    1 string data = "RespawnTrigger"
+   [20]
+    1 string data = "Boss Corpse"
+   [21]
+    1 string data = "Heart Piece"
+   [22]
+    1 string data = "TransitionGate"
+   [23]
+    1 string data = "UI Soul Orb"
+   [24]
+    1 string data = "Shade Marker"
+   [25]
+    1 string data = "Hud Camera"
+   [26]
+    1 string data = "Cinematic"
+   [27]
+    1 string data = "Roar"
+   [28]
+    1 string data = "Stag Grate"
+   [29]
+    1 string data = "Platform"
+   [30]
+    1 string data = "Boss"
+   [31]
+    1 string data = "GeoCounter"
+   [32]
+    1 string data = "CameraTarget"
+   [33]
+    1 string data = "StagMapMarker"
+   [34]
+    1 string data = "HeroFootsteps"
+   [35]
+    1 string data = "Save Icon"
+   [36]
+    1 string data = "HeroLightMain"
+   [37]
+    1 string data = "Beta End"
+   [38]
+    1 string data = "Shop Window"
+   [39]
+    1 string data = "Journal Up Msg"
+   [40]
+    1 string data = "Charms Pane"
+   [41]
+    1 string data = "Inventory Top"
+   [42]
+    1 string data = "Charm Get Msg"
+   [43]
+    1 string data = "Acid"
+   [44]
+    1 string data = "Soul Vessels"
+   [45]
+    1 string data = "Teleplane"
+   [46]
+    1 string data = "Water Surface"
+   [47]
+    1 string data = "Relic Get Msg"
+   [48]
+    1 string data = "Fireball Safe"
+   [49]
+    1 string data = "Baby Centipede"
+   [50]
+    1 string data = "Knight Hatchling"
+   [51]
+    1 string data = "Dream Attack"
+   [52]
+    1 string data = "Infected Flag"
+   [53]
+    1 string data = "Ghost Warrior NPC"
+   [54]
+    1 string data = "Extra Tag"
+   [55]
+    1 string data = "Dream Plant"
+   [56]
+    1 string data = "Dream Orb"
+   [57]
+    1 string data = "Geo"
+   [58]
+    1 string data = "Sharp Shadow"
+   [59]
+    1 string data = "Boss Attack"
+   [60]
+    1 string data = "Nail Beam"
+   [61]
+    1 string data = "Grub Bottle"
+   [62]
+    1 string data = "Colosseum Manager"
+   [63]
+    1 string data = "Wall Breaker"
+   [64]
+    1 string data = "Ignore Hatchling"
+   [65]
+    1 string data = "Hatchling Magnet"
+   [66]
+    1 string data = "Spell Vulnerable"
+   [67]
+    1 string data = "Hopper"
+   [68]
+    1 string data = "Set Extrapolate"
+   [69]
+    1 string data = "Orbit Shield"
+   [70]
+    1 string data = "Grimmchild"
+   [71]
+    1 string data = "WindyGrass"
+   [72]
+    1 string data = "Weaverling"
+ 0 vector layers
+  0 Array Array (32 items)
+   0 int size = 32
+   [0]
+    1 string data = "Default"
+   [1]
+    1 string data = "TransparentFX"
+   [2]
+    1 string data = "Ignore Raycast"
+   [3]
+    1 string data = ""
+   [4]
+    1 string data = "Water"
+   [5]
+    1 string data = "UI"
+   [6]
+    1 string data = ""
+   [7]
+    1 string data = ""
+   [8]
+    1 string data = "Terrain"
+   [9]
+    1 string data = "Player"
+   [10]
+    1 string data = "TransitionGates"
+   [11]
+    1 string data = "Enemies"
+   [12]
+    1 string data = "Projectiles"
+   [13]
+    1 string data = "Hero Detector"
+   [14]
+    1 string data = "Terrain Detector"
+   [15]
+    1 string data = "Enemy Detector"
+   [16]
+    1 string data = "Tinker"
+   [17]
+    1 string data = "Attack"
+   [18]
+    1 string data = "Particle"
+   [19]
+    1 string data = "Interactive Object"
+   [20]
+    1 string data = "Hero Box"
+   [21]
+    1 string data = "Grass"
+   [22]
+    1 string data = "Enemy Attack"
+   [23]
+    1 string data = "Damage All"
+   [24]
+    1 string data = "Bouncer"
+   [25]
+    1 string data = "Soft Terrain"
+   [26]
+    1 string data = "Corpse"
+   [27]
+    1 string data = "uGUI"
+   [28]
+    1 string data = "Hero Only"
+   [29]
+    1 string data = "ActiveRegion"
+   [30]
+    1 string data = "Map Pin"
+   [31]
+    1 string data = "Orbit Shield"
+ 0 vector m_SortingLayers
+  0 Array Array (14 items)
+   0 int size = 14
+   [0]
+    0 SortingLayerEntry data
+     1 string name = "Default"
+     1 unsigned int uniqueID = 0
+     1 bool locked = false
+   [1]
+    0 SortingLayerEntry data
+     1 string name = "Far BG 2"
+     1 unsigned int uniqueID = 3315419377
+     1 bool locked = false
+   [2]
+    0 SortingLayerEntry data
+     1 string name = "Far BG 1"
+     1 unsigned int uniqueID = 1459018367
+     1 bool locked = false
+   [3]
+    0 SortingLayerEntry data
+     1 string name = "Mid BG"
+     1 unsigned int uniqueID = 4015848369
+     1 bool locked = false
+   [4]
+    0 SortingLayerEntry data
+     1 string name = "Immediate BG"
+     1 unsigned int uniqueID = 2917268371
+     1 bool locked = false
+   [5]
+    0 SortingLayerEntry data
+     1 string name = "Actors"
+     1 unsigned int uniqueID = 1270309357
+     1 bool locked = false
+   [6]
+    0 SortingLayerEntry data
+     1 string name = "Player"
+     1 unsigned int uniqueID = 3557629463
+     1 bool locked = false
+   [7]
+    0 SortingLayerEntry data
+     1 string name = "Tiles"
+     1 unsigned int uniqueID = 3868594333
+     1 bool locked = false
+   [8]
+    0 SortingLayerEntry data
+     1 string name = "MID Dressing"
+     1 unsigned int uniqueID = 3784110789
+     1 bool locked = false
+   [9]
+    0 SortingLayerEntry data
+     1 string name = "Immediate FG"
+     1 unsigned int uniqueID = 31172181
+     1 bool locked = false
+   [10]
+    0 SortingLayerEntry data
+     1 string name = "Far FG"
+     1 unsigned int uniqueID = 2577183099
+     1 bool locked = false
+   [11]
+    0 SortingLayerEntry data
+     1 string name = "Vignette"
+     1 unsigned int uniqueID = 1038907033
+     1 bool locked = false
+   [12]
+    0 SortingLayerEntry data
+     1 string name = "Over"
+     1 unsigned int uniqueID = 3945752401
+     1 bool locked = false
+   [13]
+    0 SortingLayerEntry data
+     1 string name = "HUD"
+     1 unsigned int uniqueID = 629535577
+     1 bool locked = false
