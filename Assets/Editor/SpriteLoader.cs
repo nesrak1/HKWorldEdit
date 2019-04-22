@@ -128,6 +128,64 @@ public class SpriteLoader
         }
         return image;
     }
+    public Texture2D LoadTK2dSpriteNative(AssetsManager manager, AssetTypeValueField baseField, AssetsFileInstance spriteFileInst, int spriteId)
+    {
+        AssetTypeValueField spriteDefinitions = baseField.Get("spriteDefinitions");
+        
+        AssetTypeValueField textures = baseField.Get("textures");
+        AssetTypeValueField texture = textures[0];
+        int texFileId = texture.Get("m_FileID").GetValue().AsInt();
+        long texPathId = texture.Get("m_PathID").GetValue().AsInt64();
+        AssetTypeValueField textureBaseField = manager.GetExtAsset(spriteFileInst, texture).instance.GetBaseField();
+
+        Bitmap bitmap = GetBitmapNative(manager, textureBaseField, texFileId, texPathId, spriteFileInst);
+        
+        AssetTypeValueField spriteDefinition = spriteDefinitions[(uint)spriteId];
+        AssetTypeValueField uvs = spriteDefinition.Get("uvs");
+
+        double xn = int.MaxValue,
+               xp = 0,
+               yn = int.MaxValue,
+               yp = 0;
+        for (uint i = 0; i < 4; i++)
+        {
+            AssetTypeValueField uv = uvs[i];
+            double uv_x = Math.Round(uv.Get("x").GetValue().AsFloat() * bitmap.Width);
+            double uv_y = bitmap.Height - Math.Round(uv.Get("y").GetValue().AsFloat() * bitmap.Height);
+            if (uv_x < xn)
+                xn = uv_x;
+            if (uv_x > xp)
+                xp = uv_x;
+            if (uv_y < yn)
+                yn = uv_y;
+            if (uv_y > yp)
+                yp = uv_y;
+        }
+
+        int x = (int)xn;
+        int y = (int)yn;
+        int width = (int)(xp - xn);
+        int height = (int)(yp - yn);
+
+        Bitmap croppedBitmap = new Bitmap(width, height);
+        using (Graphics graphics = Graphics.FromImage(croppedBitmap))
+        {
+            graphics.DrawImage(bitmap, -x, -y);
+        }
+
+        if (spriteDefinition.Get("flipped").GetValue().AsInt() == 1)
+            croppedBitmap.RotateFlip(RotateFlipType.Rotate270FlipX);
+
+        croppedBitmap = ResizeImage(croppedBitmap, (int)(croppedBitmap.Width * 1.5625f), (int)(croppedBitmap.Height * 1.5625f));
+
+        Texture2D image = new Texture2D(width, height);
+        using (MemoryStream stream = new MemoryStream())
+        {
+            croppedBitmap.Save(stream, croppedBitmap.RawFormat);
+            image.LoadImage(stream.ToArray());
+        }
+        return image;
+    }
     public static Bitmap ResizeImage(Image image, int width, int height)
     {
         var destRect = new Rectangle(0, 0, width, height);
@@ -302,6 +360,94 @@ public class SpriteLoader
 
         data = new byte[0];
 
+        sw.Stop();
+        Debug.Log(sw.ElapsedMilliseconds + "ms to decode fmt " + m_TextureFormat);
+        //Profiler.EndSample();
+
+        GC.Collect(); //evil
+        bitmapPool[assetTest] = bitmap;
+        return bitmap;
+    }
+    private Bitmap GetBitmapNative(AssetsManager manager, AssetTypeValueField baseField, int fileId, long pathId, AssetsFileInstance fromInst)
+    {
+        AssetID assetTest = new AssetID(fromInst, fileId, pathId);
+        if (bitmapPool.ContainsKey(assetTest))
+            return bitmapPool[assetTest];
+
+        //Profiler.BeginSample("Bitmap load");
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        int m_Width = baseField.Get("m_Width").GetValue().AsInt();
+        int m_Height = baseField.Get("m_Height").GetValue().AsInt();
+        int m_TextureFormat = baseField.Get("m_TextureFormat").GetValue().AsInt();
+        if (m_TextureFormat != 3 && m_TextureFormat != 4 && m_TextureFormat != 10 && m_TextureFormat != 12)
+            return SystemIcons.Exclamation.ToBitmap();
+            //throw new Exception("TEX doesn't support format " + m_TextureFormat + " please contact nes");
+
+        byte[] data = null;
+        AssetTypeValueField m_StreamData = baseField.Get("m_StreamData");
+        int offset = (int)m_StreamData.Get("offset").GetValue().AsUInt();
+        int size = (int)m_StreamData.Get("size").GetValue().AsUInt();
+        //check if texture is in resS (most likely is)
+        if (size != 0)
+        {
+            string path = m_StreamData.Get("path").GetValue().AsString();
+            string fullPath = Path.Combine(Path.GetDirectoryName(fromInst.path), path);
+            using (FileStream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                long fileSize = stream.Length;
+                data = new byte[size];
+                stream.Position = offset;
+
+                int bytesRead;
+                var buffer = new byte[2048];
+                while ((stream.Position < offset + size) && ((bytesRead = stream.Read(buffer, 0, 2048)) > 0))
+                {
+                    memStream.Write(buffer, 0, bytesRead);
+                }
+                data = memStream.ToArray();
+            }
+        }
+        else
+        {
+            data = GetByteData(baseField.Get("image data"));
+        }
+
+        Bitmap bitmap = null;
+
+        //todo handle with unity, possibly Texture2D.CreateExternalTexture
+        //if (m_TextureFormat == 3)
+        //{
+        //    bitmap = TEXMain.ReadRGB24(data, m_Width, m_Height);
+        //}
+        //else if (m_TextureFormat == 4)
+        //{
+        //    bitmap = TEXMain.ReadRGBA32(data, m_Width, m_Height);
+        //}
+        //else if (m_TextureFormat == 10)
+        //{
+        //    bitmap = TEXMain.ReadDXT1(data, m_Width, m_Height);
+        //}
+        //else if (m_TextureFormat == 12)
+        //{
+        //    bitmap = TEXMain.ReadDXT5(data, m_Width, m_Height);
+        //}
+        
+        Texture2D tex2d = new Texture2D(m_Width, m_Height, (TextureFormat)m_TextureFormat, false);
+        tex2d.LoadRawTextureData(data);
+        Color32[] colors = tex2d.GetPixels32();
+        byte[] colorData = new byte[colors.Length * 4];
+        for (int i = 0, j = 0; i < colors.Length; i++, j += 4)
+        {
+            colorData[j] = colors[i].b;
+            colorData[j+1] = colors[i].g;
+            colorData[j+2] = colors[i].r;
+            colorData[j+3] = colors[i].a;
+        }
+        //bitmap = new Bitmap(new MemoryStream(tex2d.EncodeToPNG()));
+        bitmap = new Bitmap(m_Width, m_Height, m_Width * 4, PixelFormat.Format32bppArgb, Marshal.UnsafeAddrOfPinnedArrayElement(colorData, 0));
+        bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY); //todo make reader read flipped already
         sw.Stop();
         Debug.Log(sw.ElapsedMilliseconds + "ms to decode fmt " + m_TextureFormat);
         //Profiler.EndSample();

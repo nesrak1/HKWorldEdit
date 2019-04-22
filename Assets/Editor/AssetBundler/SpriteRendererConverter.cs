@@ -19,7 +19,9 @@ namespace BundleLoader
             m_GameObject.Get("m_PathID").GetValue().Set((long)goPPtr.pathID);
 
             //Material refs
-            m_Materials.value.value.asArray.size = 1;
+            AssetTypeArray arr = m_Materials.value.value.asArray;
+            arr.size = 1;
+            m_Materials.value.value.asArray = arr;
             m_Materials.pChildren = new AssetTypeValueField[1];
             AssetTypeValueField m_FileID = new AssetTypeValueField()
             {

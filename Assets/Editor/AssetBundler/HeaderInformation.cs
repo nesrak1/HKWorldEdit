@@ -21,7 +21,7 @@ namespace BundleLoader
                 {
                     AssetID key = file.Key;
                     ulong value = file.Value;
-                    builder.Append(key.fileId + "," + key.pathId + "=" + value + ";");
+                    builder.Append(key.fileName + "," + key.pathId + "=" + value + ";");
                 }
                 builder.Remove(builder.Length - 1, 1);
                 writer.WriteCountStringInt32(builder.ToString());

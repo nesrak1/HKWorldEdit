@@ -12,6 +12,7 @@ public struct DiffFile
     public List<GameObjectChange> changes;
     public List<GameObjectAdd> adds;
     public List<GameObjectRemove> removes;
+    public List<GameObjectInfo> infos;
     public void Write(BinaryWriter w)
     {
         w.Write(magic);
@@ -31,6 +32,11 @@ public struct DiffFile
         for (int i = 0; i < removes.Count; i++)
         {
             removes[i].Write(w);
+        }
+        w.Write(infos.Count);
+        for (int i = 0; i < infos.Count; i++)
+        {
+            infos[i].Write(w);
         }
     }
 }
@@ -159,18 +165,22 @@ public struct FieldChange
 
 public struct GameObjectAdd
 {
-    public long pathId;
-    public long parentId;
+    public ulong pathId;
+    public ulong parentId;
+    public bool goNew;
+    public bool parentNew;
     public void Write(BinaryWriter w)
     {
         w.Write(pathId);
         w.Write(parentId);
+        w.Write(goNew);
+        w.Write(parentNew);
     }
 }
 
 public struct GameObjectRemove
 {
-    public long pathId;
+    public ulong pathId;
     //public string path;
     //public int hash;
     //public HashTolerance hashTolerance;
@@ -180,6 +190,28 @@ public struct GameObjectRemove
         //w.Write(path);
         //w.Write(hash);
         //w.Write((int)hashTolerance);
+    }
+}
+
+public struct GameObjectInfo
+{
+    public string name;
+    public uint fileId;
+    public ulong origPathId;
+    public ulong pathId;
+    public GameObjectInfo(string name, uint fileId, ulong origPathId, ulong pathId)
+    {
+        this.name = name;
+        this.fileId = fileId;
+        this.origPathId = origPathId;
+        this.pathId = pathId;
+    }
+    public void Write(BinaryWriter w)
+    {
+        w.Write(name);
+        w.Write(fileId);
+        w.Write(origPathId);
+        w.Write(pathId);
     }
 }
 

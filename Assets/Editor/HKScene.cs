@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,6 +31,26 @@ public class HKScene
             HKScene scene = new HKScene(path);
         }
     }
+    [MenuItem("HKEdit/Open Scene By Name", priority = 0)]
+    public static void OpenSceneByName()
+    {
+        AssetsManager am = new AssetsManager();
+        am.LoadClassPackage(Path.Combine(Application.dataPath, "cldb.dat"));
+
+        string gameDataPath = GetGamePath();
+
+        AssetsFileInstance inst = am.LoadAssetsFile(Path.Combine(gameDataPath, "globalgamemanagers"), false);
+        AssetFileInfoEx buildSettings = inst.table.getAssetInfo(11);
+
+        List<string> scenes = new List<string>();
+        AssetTypeValueField baseField = am.GetATI(inst.file, buildSettings).GetBaseField();
+        AssetTypeValueField sceneArray = baseField.Get("scenes").Get("Array");
+        for (uint i = 0; i < sceneArray.GetValue().AsArray().size; i++)
+        {
+            scenes.Add(sceneArray[i].GetValue().AsString() + "[" + i + "]");
+        }
+        SceneSelector sel = SceneSelector.ShowDialog(am, scenes, gameDataPath);
+    }
 
     [MenuItem("HKEdit/Set Active Scene", priority = 22)]
     public static void SetActiveScene()
@@ -42,17 +63,55 @@ public class HKScene
         }
     }
 
-    [MenuItem("HKDebug/Load the Triangle", priority = 50)]
-    public static void LoadTriangle()
+    [MenuItem("HKEdit/Add EditDiffer %r", priority = 33)]
+    public static void AddEditDiffer()
     {
-        AssetBundle bundle = AssetBundle.LoadFromFile(@"C:\Users\karse\Documents\HKEdit\test.unity3d");
-        Sprite s = bundle.LoadAsset<Sprite>("3") as Sprite;
-
-        GameObject go = UnityEngine.Object.Instantiate(new GameObject()) as GameObject;
-
-        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = s;
+        if (Selection.activeGameObject != null)
+        {
+            GameObject obj = Selection.activeGameObject;
+            EditDiffer differ = obj.GetComponent<EditDiffer>();
+            if (differ == null)
+            {
+                differ = obj.AddComponent<EditDiffer>();
+            }
+            differ.pathId = differ.NextPathID();
+            differ.newAsset = true;
+        }
     }
+
+    private static string GetGamePath()
+    {
+        string gamePath = SteamHelper.FindHollowKnightPath();
+
+        if (gamePath == "" || !Directory.Exists(gamePath))
+        {
+            EditorUtility.DisplayDialog("HKEdit", "Could not find Steam path. If you've moved your Steam directory this could be why. Contact nes.", "OK");
+            return null;
+        }
+
+        string gameDataPath = Path.Combine(gamePath, "hollow_knight_Data");
+
+        return gameDataPath;
+    }
+
+    //[MenuItem("HKDebug/Load the Triangle", priority = 50)]
+    //public static void LoadTriangle()
+    //{
+    //    AssetBundle bundle = AssetBundle.LoadFromFile(@"C:\Users\karse\Documents\ScenePakTest3\triangle.unity3d");
+    //    Sprite s = bundle.LoadAsset<Sprite>("triangle") as Sprite;
+    //
+    //    GameObject go = new GameObject() as GameObject;
+    //
+    //    SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+    //    sr.sprite = s;
+    //
+    //    //bundle.Unload(false);
+    //}
+    //[MenuItem("HKDebug/Unload Bundle", priority = 51)]
+    //public static void UnloadBundle()
+    //{
+    //    AssetBundle.UnloadAllAssetBundles(true);
+    //}
 
     AssetsFileInstance assetsFileInstance;
     AssetsFile assetsFile;
@@ -62,18 +121,29 @@ public class HKScene
     UnityEngine.Object[] bundleAssets;
     Dictionary<AssetID, int> assetMap = new Dictionary<AssetID, int>();
     Dictionary<int, string> monoBehaviourIds = new Dictionary<int, string>();
-    public HKScene(string path)
+    public HKScene(string path, AssetsManager ami = null)
     {
         //using (FileStream assetStream = new FileStream(path, FileMode.Open))
         //{
         EditorUtility.DisplayProgressBar("HKEdit", "Loading level file", 0);
         diffFile = path;
         string folderName = Path.GetDirectoryName(path);
-        am = new AssetsManager();
+        if (ami != null)
+        {
+            am = ami;
+        }
+        else
+        {
+            am = new AssetsManager();
+        }
+
+        if (am.classFile == null)
+        {
+            am.LoadClassPackage(Path.Combine(Application.dataPath, "cldb.dat"));
+        }
         assetsFileInstance = am.LoadAssetsFile(path, false);
         assetsFile = assetsFileInstance.file;
         assetsTable = assetsFileInstance.table;
-        am.LoadClassPackage(Path.Combine(Application.dataPath, "cldb.dat"));
         //AssetFileInfoEx scenery = FindGameObject("_Scenery");
         //if (scenery == null)
         //{
@@ -82,7 +152,9 @@ public class HKScene
         //    return;
         //}
         EditorUtility.DisplayProgressBar("HKEdit", "Loading dependencies", 0);
+        //i dunno what this does but it should fix dependency issues
         am.LoadAssetsFile(path, true);
+        EditorUtility.DisplayProgressBar("HKEdit", "Loading dependencies refs", 50);
         am.UpdateDependencies();
 
         spriteLoader = new SpriteLoader();
@@ -103,9 +175,11 @@ public class HKScene
         //}
 
         byte[] bundleData = Loader.CreateBundleFromLevel(am, assetsFileInstance);
-        EditorUtility.DisplayProgressBar("HKEdit", "Loading bundle", 1);
+        EditorUtility.DisplayProgressBar("HKEdit", "Loading bundle", 0);
         bundle = AssetBundle.LoadFromMemory(bundleData);
-        EditorUtility.DisplayProgressBar("HKEdit", "Loading scene", 1);
+        EditorUtility.DisplayProgressBar("HKEdit", "Loading scene", 50);
+
+        File.WriteAllBytes("hkwedebug.unity3d", bundleData);
 
         //assetMap = GetAssetMap(am, bundle);
 
@@ -117,17 +191,17 @@ public class HKScene
         {
             string withoutExt = fileName.Substring(0, fileName.Length - 4);
             string assetName = withoutExt.Split('/')[0];
-            int fileId = int.Parse(withoutExt.Split('/')[1]);
-            long pathId = long.Parse(withoutExt.Split('/')[2]);
-            if (fileId == 0 && pathId == 0)
+            long pathId = long.Parse(withoutExt.Split('/')[1]);
+            if (assetName == "" && pathId == 0)
             {
                 index++;
                 continue;
             }
-            assetMap.Add(new AssetID(assetName, fileId, pathId), index);
+            assetMap.Add(new AssetID(assetName, pathId), index);
             index++;
         }
 
+        EditDiffer.usedIds.Clear();
         int i = 0;
         foreach (AssetFileInfoEx info in assetsTable.pAssetFileInfo)
         {
@@ -136,8 +210,10 @@ public class HKScene
             {
                 RecurseGameObjects(info, true);
             }
+            EditDiffer.usedIds.Add(info.index);
             i++;
         }
+
         EditorUtility.ClearProgressBar();
 
         //SpriteLoader sprites = new SpriteLoader();
@@ -187,6 +263,7 @@ public class HKScene
         EditDiffer differ = gameObjectInstance.AddComponent<EditDiffer>();
         differ.fileId = 0;
         differ.pathId = info.index;
+        differ.origPathId = differ.pathId;
 
         Transform transformInstance = gameObjectInstance.transform;
 
@@ -225,18 +302,107 @@ public class HKScene
                 else
                     spriteInst = assetsFileInstance.dependencies[m_Sprite.Get("m_FileID").GetValue().AsInt() - 1];
 
+
                 //Texture2D image = spriteLoader.LoadUnitySprite(am, sprite.instance.GetBaseField(), assetsFileInstance.dependencies[fileId - 1]);
 
                 //Sprite spriteInstance = Sprite.Create(image, new Rect(0, 0, image.width, image.height), new Vector2(0.5f, 0.5f), 100f);
-                Sprite spriteInstance = bundleAssets[assetMap[new AssetID(Path.GetFileName(spriteInst.path), fileId, pathId)]] as Sprite;
+                Sprite spriteInstance = bundleAssets[assetMap[new AssetID(Path.GetFileName(spriteInst.path), pathId)]] as Sprite;
                 SpriteRenderer sr = gameObjectInstance.AddComponent<SpriteRenderer>();
                 string[] sortingLayers = new[] { "Default", "Far BG 2", "Far BG 1", "Mid BG", "Immediate BG", "Actors", "Player", "Tiles", "MID Dressing", "Immediate FG", "Far FG", "Vignette", "Over", "HUD" };
                 sr.sortingLayerName = sortingLayers[baseField.Get("m_SortingLayer").GetValue().AsInt()];
                 sr.sortingOrder = baseField.Get("m_SortingOrder").GetValue().AsInt();
                 sr.sprite = spriteInstance;
-                //spriteInstance.bounds.SetMinMax(new Vector3(0, 0), new Vector3(50, 50));
-                //Debug.Log(spriteInstance.bounds.extents.x + "," + spriteInstance.bounds.extents.y + "," + spriteInstance.bounds.extents.z);
+
+                //AssetTypeValueField m_Materials = baseField.Get("m_Materials").Get("Array");
+                //if (m_Materials.GetValue().AsArray().size > 0)
+                //{
+                //    AssetTypeValueField m_Material = m_Materials[0];
+                //
+                //    int matFileId = m_Material.Get("m_FileID").GetValue().AsInt();
+                //    long matPathId = m_Material.Get("m_PathID").GetValue().AsInt64();
+                //
+                //    AssetsFileInstance materialInst;
+                //    if (m_Material.Get("m_FileID").GetValue().AsInt() == 0)
+                //        materialInst = assetsFileInstance;
+                //    else
+                //        materialInst = assetsFileInstance.dependencies[matFileId - 1];
+                //    if (assetMap.ContainsKey(new AssetID(Path.GetFileName(materialInst.path), matPathId)))
+                //    {
+                //        //Debug.Log("getting item " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
+                //        Material mat = bundleAssets[assetMap[new AssetID(Path.GetFileName(materialInst.path), matPathId)]] as Material;
+                //        if (mat.shader.name != "Sprites/Lit") //honestly this shader confuses me. it is the only shader
+                //        {                                     //with no code and only references the generic material
+                //            sr.material = mat;
+                //        }
+                //        //else
+                //        //{
+                //        //    mat.shader = sr.sharedMaterial.shader;
+                //        //    sr.sharedMaterial = mat;
+                //        //}
+                //        if (mat.shader.name == "Hollow Knight/Grass-Default")
+                //        {
+                //            sr.sharedMaterial.SetFloat("_SwayAmount", 0f); //stops grass animation
+                //        }
+                //    }
+                //    else
+                //    {
+                //        //Debug.Log("failed to find " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
+                //    }
+                //}
+                ////spriteInstance.bounds.SetMinMax(new Vector3(0, 0), new Vector3(50, 50));
+                ////Debug.Log(spriteInstance.bounds.extents.x + "," + spriteInstance.bounds.extents.y + "," + spriteInstance.bounds.extents.z);
                 break;
+            }
+            if (component.info.curFileType == MONOBEHAVIOUR)
+            {
+                //AssetTypeValueField baseField = am.GetMonoBaseFieldCached(assetsFileInstance, component.info, managedPath);
+                //int monoTypeId = assetsFileInstance.file.typeTree.pTypes_Unity5[component.info.curFileTypeOrIndex].scriptIndex;
+
+                component = am.GetExtAsset(assetsFileInstance, m_Component[i].Get("component"));
+                AssetTypeValueField baseField = component.instance.GetBaseField();
+                int monoTypeId = assetsFileInstance.file.typeTree.pTypes_Unity5[component.info.curFileTypeOrIndex].scriptIndex;
+                if (monoBehaviourIds.ContainsKey(monoTypeId))
+                {
+                    if (monoBehaviourIds[monoTypeId] == "tk2dSprite")
+                    {
+                        string managedPath = Path.Combine(Path.GetDirectoryName(assetsFileInstance.path), "Managed");
+                        baseField = am.GetMonoBaseFieldCached(assetsFileInstance, component.info, managedPath);
+
+                        AssetTypeValueField collection = baseField.Get("collection");
+                        int _spriteId = baseField.Get("_spriteId").GetValue().AsInt();
+
+                        int fileId = collection.Get("m_FileID").GetValue().AsInt();
+                        //long pathId = collection.Get("m_PathID").GetValue().AsInt64();
+
+                        AssetsManager.AssetExternal sprite = am.GetExtAsset(assetsFileInstance, collection);
+                        if (sprite.info == null)
+                            break;
+
+                        AssetsFileInstance spriteFileInstance = assetsFileInstance.dependencies[fileId - 1];
+                        //AssetTypeValueField spriteBaseField = Util.GetMonoBaseField(am, spriteFileInstance.file, sprite.info, Path.GetDirectoryName(assetsFileInstance.path));
+                        AssetTypeValueField spriteBaseField = am.GetMonoBaseFieldCached(spriteFileInstance, sprite.info, managedPath);
+                        
+                        Texture2D image = spriteLoader.LoadTK2dSpriteNative(am, spriteBaseField, spriteFileInstance, _spriteId);
+
+                        Sprite spriteInstance = Sprite.Create(image, new Rect(0, 0, image.width, image.height), new Vector2(0.5f, 0.5f), 100f);
+                        SpriteRenderer sr = gameObjectInstance.AddComponent<SpriteRenderer>();
+                        sr.sortingLayerName = "Default";
+                        sr.sortingOrder = 0;
+                        sr.sprite = spriteInstance;
+                        break;
+                    }
+                }
+                else
+                {
+                    //map out the monobehaviour script indexes to their name for fast lookup
+                    AssetTypeValueField m_Script = baseField.Get("m_Script");
+                    AssetsManager.AssetExternal script = am.GetExtAsset(assetsFileInstance, m_Script);
+                    string scriptName = script.instance.GetBaseField().Get("m_Name").GetValue().AsString();
+                    if (!monoBehaviourIds.ContainsValue(scriptName))
+                    {
+                        monoBehaviourIds[monoTypeId] = scriptName;
+                    }
+                }
             }
             /*if (component.info.curFileType == MONOBEHAVIOUR)
             {
@@ -311,14 +477,29 @@ public class HKScene
         scenemap.transform.parent = tileMapRenderData.transform;
 
         AssetTypeValueField trdChildArray = transform.Get("m_Children").Get("Array");
-        AssetTypeValueField scenemapBaseField = am.GetExtAsset(assetsFileInstance, trdChildArray[0]).instance.GetBaseField();
+        uint childrenCount = trdChildArray.GetValue().AsArray().size;
+        AssetTypeValueField sceneMap = null;
+        for (uint i = 0; i < childrenCount; i++)
+        {
+            AssetTypeValueField childTf = am.GetExtAsset(assetsFileInstance, trdChildArray[i]).instance.GetBaseField();
+            AssetTypeValueField childGo = am.GetExtAsset(assetsFileInstance, childTf.Get("m_GameObject")).instance.GetBaseField();
+            if (childGo.Get("m_Name").GetValue().AsString() == "Scenemap")
+            {
+                sceneMap = trdChildArray[i];
+            }
+        }
+        if (sceneMap == null)
+        {
+            return tileMapRenderData;
+        }
+        AssetTypeValueField scenemapBaseField = am.GetExtAsset(assetsFileInstance, sceneMap).instance.GetBaseField();
         AssetTypeValueField scenemapChildArray = scenemapBaseField.Get("m_Children").Get("Array");
-        uint childrenCount = scenemapChildArray.GetValue().AsArray().size;
+        childrenCount = scenemapChildArray.GetValue().AsArray().size;
         for (uint i = 0; i < childrenCount; i++)
         {
             AssetTypeValueField childTf = am.GetExtAsset(assetsFileInstance, scenemapChildArray[i]).instance.GetBaseField();
             AssetTypeValueField childGo = am.GetExtAsset(assetsFileInstance, childTf.Get("m_GameObject")).instance.GetBaseField();
-
+            
             GameObject chunk = new GameObject(childGo.Get("m_Name").GetValue().AsString());
             chunk.transform.parent = scenemap.transform;
 
@@ -385,8 +566,8 @@ public class HKScene
 
         return tileMapRenderData;
     }
-    
-    public Vector3 GetVector3(AssetTypeValueField field)
+
+    private Vector3 GetVector3(AssetTypeValueField field)
     {
         float x = field.Get("x").GetValue().AsFloat();
         float y = field.Get("y").GetValue().AsFloat();
@@ -394,7 +575,7 @@ public class HKScene
         return new Vector3(x, y, z);
     }
 
-    public Quaternion GetQuaternion(AssetTypeValueField field)
+    private Quaternion GetQuaternion(AssetTypeValueField field)
     {
         float x = field.Get("x").GetValue().AsFloat();
         float y = field.Get("y").GetValue().AsFloat();

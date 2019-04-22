@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HKEdit", "Assembly-CSharp.csproj", "{AEAF73AB-FB96-5FBA-72C4-039FF716B742}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HKEdit", "Assembly-CSharp-Editor.csproj", "{BC157B7A-B48A-7E26-BB49-2E239BE2057E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEAF73AB-FB96-5FBA-72C4-039FF716B742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEAF73AB-FB96-5FBA-72C4-039FF716B742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEAF73AB-FB96-5FBA-72C4-039FF716B742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEAF73AB-FB96-5FBA-72C4-039FF716B742}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC157B7A-B48A-7E26-BB49-2E239BE2057E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC157B7A-B48A-7E26-BB49-2E239BE2057E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC157B7A-B48A-7E26-BB49-2E239BE2057E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC157B7A-B48A-7E26-BB49-2E239BE2057E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

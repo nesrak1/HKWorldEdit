@@ -19,10 +19,10 @@ public class HKSave
         if (HKScene.diffFile.Length == 0)
         {
             EditorUtility.DisplayDialog("HKEdit", "Initial file not loaded. If you edited code, you can set the active map by \"Set Active Map\".", "OK");
-			return;
+            return;
         }
         string path = EditorUtility.SaveFilePanel("Choose level save location", "", "", "");
-		if (path.Length != 0 && File.Exists(diff))
+        if (path.Length != 0 && File.Exists(diff))
         {
             HKSave save = new HKSave(path, diff);
         }
@@ -50,6 +50,8 @@ public class HKSave
         List<GameObjectAdd> addList = new List<GameObjectAdd>();
         List<GameObjectRemove> removeList = new List<GameObjectRemove>();
         List<GameObjectChange> changeList = new List<GameObjectChange>();
+        List<GameObject> newGameObjects = new List<GameObject>();
+        List<GameObjectInfo> newGoInfos = new List<GameObjectInfo>();
 
         int i = 0;
         foreach (GameObject obj in sceneObjs)
@@ -58,32 +60,73 @@ public class HKSave
             EditDiffer differ = obj.GetComponent<EditDiffer>();
             if (differ != null)
             {
-                List<ComponentChangeOrAdd> changes = new List<ComponentChangeOrAdd>();
-                List<ComponentRemove> removes = new List<ComponentRemove>();
-                
-                ulong origPathId = differ.pathId;
-
-                CompareTransform(obj, origPathId, changes);
-
-                if (changes.Count > 0 || removes.Count > 0)
+                if (!differ.newAsset)
                 {
-                    changeList.Add(new GameObjectChange()
+                    List<ComponentChangeOrAdd> changes = new List<ComponentChangeOrAdd>();
+                    List<ComponentRemove> removes = new List<ComponentRemove>();
+
+                    ulong origPathId = differ.pathId;
+
+                    CompareTransform(obj, origPathId, changes);
+
+                    if (changes.Count > 0 || removes.Count > 0)
                     {
-                        pathId = (long)origPathId,
-                        changes = changes,
-                        removes = removes
+                        changeList.Add(new GameObjectChange()
+                        {
+                            pathId = (long)origPathId,
+                            changes = changes,
+                            removes = removes
+                        });
+                    }
+                }
+                else
+                {
+                    //bool parentIsNew = false;
+                    ulong parentPathId = ulong.MaxValue;
+                    if (obj.transform.parent == null)
+                    {
+                        parentPathId = 0;
+                    }
+                    else
+                    {
+                        EditDiffer ed = obj.transform.parent.gameObject.GetComponent<EditDiffer>();
+                        if (ed != null)
+                        {
+                            parentPathId = ed.pathId;
+                            //if (ed.newAsset)
+                            //{
+                            //    parentIsNew = true;
+                            //}
+                        }
+                        else
+                        {
+                            Debug.LogWarning("editdiff missing from " + obj.name + "'s parent");
+                        }
+                    }
+                    bool newAsset = differ.origPathId == 0; //when a new asset was created *not* by cloning
+                    addList.Add(new GameObjectAdd()
+                    {
+                        pathId = differ.pathId,
+                        parentId = parentPathId,
+                        goNew = newAsset
                     });
+                    newGameObjects.Add(obj);
+                    if (newAsset)
+                    {
+                        newGoInfos.Add(new GameObjectInfo(obj.name, differ.fileId, differ.origPathId, differ.pathId));
+                    }
                 }
             }
             i++;
         }
         LoadProgress("Create Diff Bundle", 0);
-        CreateBundle(path, addList, removeList, changeList);
+        CreateBundle(path, addList, removeList, changeList, newGameObjects, newGoInfos);
         EditorUtility.ClearProgressBar();
+        EditorUtility.DisplayDialog("HKEdit", "Diff saved. Because of a Unity bug, please clear and reopen the map to continue working. All errors shown after save are normal.", "OK");
         //stream.Close();
     }
 
-    private void CreateBundle(string path, List<GameObjectAdd> addList, List<GameObjectRemove> removeList, List<GameObjectChange> changeList)
+    private void CreateBundle(string path, List<GameObjectAdd> addList, List<GameObjectRemove> removeList, List<GameObjectChange> changeList, List<GameObject> newGameObjects, List<GameObjectInfo> newGoInfos)
     {
         byte[] data = null;
         using (MemoryStream ms = new MemoryStream())
@@ -96,7 +139,8 @@ public class HKSave
                 unityCompiledVersion = Application.unityVersion,
                 adds = addList,
                 removes = removeList,
-                changes = changeList
+                changes = changeList,
+                infos = newGoInfos
             };
             file.Write(w);
             data = ms.ToArray();
@@ -104,20 +148,43 @@ public class HKSave
 
         //unity doesn't trust us to import files from
         //memory so we have to create a file to import it
-        string dataPath = "Assets/HKWEDiffData.bytes";
+        string dataPath = "Assets/ABTemp/HKWEDiffData.bytes";
 
         File.WriteAllBytes(dataPath, data);
-         AssetDatabase.SaveAssets();
+        AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+
+        List<string> buildAssets = new List<string>();
+        buildAssets.Add("Assets/ABTemp/HKWEDiffData.bytes");
+        foreach (GameObject go in newGameObjects)
+        {
+            EditDiffer ed = go.GetComponent<EditDiffer>();
+            string pName = "Assets/ABTemp/HKWEA_" + go.name.Substring(0, Math.Min(go.name.Length, 8)) + "_" + ed.fileId + "_" + ed.origPathId + "_" + ed.pathId + ".prefab";
+            Debug.Log("creating asset " + pName);
+            GameObject pgo = PrefabUtility.CreatePrefab(pName, go, ReplacePrefabOptions.Default);
+            PrefabUtility.DisconnectPrefabInstance(go);
+            UnityEngine.Object.DestroyImmediate(pgo.GetComponent<EditDiffer>(), true);
+            EditorUtility.SetDirty(pgo);
+            buildAssets.Add(pName);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log("printing assets");
+        foreach (string str in buildAssets)
+        {
+            Debug.Log(str);
+        }
 
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
         buildMap[0].assetBundleName = Path.GetFileName(path);
-        buildMap[0].assetNames = new string[] { "Assets/HKWEDiffData.bytes" };
+        buildMap[0].assetNames = buildAssets.ToArray();
         BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(path), buildMap, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows64);
 
         //File.Delete(dataPath);
     }
-    
+
     //fast transform compare since most
     //changes will probably be transforms
     private void CompareTransform(GameObject obj, ulong origPathId, List<ComponentChangeOrAdd> changes)

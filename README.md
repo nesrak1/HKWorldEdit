@@ -1,5 +1,9 @@
 ## HKWE
 
+### !!! Note !!!
+
+The latest update requires Unity 2017.4.10f1 which you can download from the Unity download archive.
+
 Look here for a demo:
 
 https://www.youtube.com/watch?v=8hLyvyG6M4Q

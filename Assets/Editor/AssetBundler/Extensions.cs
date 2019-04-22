@@ -31,8 +31,6 @@ namespace BundleLoader
             {
                 if (valueField.templateField.valueType == EnumValueTypes.ValueType_ByteArray)
                 {
-                    uint size = valueField.value.value.asByteArray.size;
-
                     writer.Write(valueField.value.value.asByteArray.size);
                     writer.Write(valueField.value.value.asByteArray.data);
                     if (valueField.templateField.align) writer.Align();
@@ -152,7 +150,6 @@ namespace BundleLoader
 
             int initialSize = (int)(AssetFileInfo.GetSize(file.header.format) * file.AssetCount);
             int newSize = (int)(AssetFileInfo.GetSize(file.header.format) * (file.AssetCount + pReplacers.Length));
-            int appendedSize = newSize - initialSize;
             file.reader.Position = file.AssetTablePos;
 
             List<AssetFileInfo> originalAssetInfos = new List<AssetFileInfo>();

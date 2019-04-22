@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class AboutMenu : EditorWindow
 {
-    [MenuItem("HKEdit/About HKEdit", priority = 33)]
+    [MenuItem("HKEdit/About HKEdit", priority = 44)]
     public static void About()
     {
         //EditorWindow window = GetWindow<AboutMenu>();

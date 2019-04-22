@@ -1,0 +1,1 @@
+this folder holds the temporary gameobjects created when saving the level. you can safely delete these files once they appear here.
