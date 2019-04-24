@@ -171,11 +171,11 @@ public class HKSave
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("printing assets");
-        foreach (string str in buildAssets)
-        {
-            Debug.Log(str);
-        }
+        //Debug.Log("printing assets");
+        //foreach (string str in buildAssets)
+        //{
+        //    Debug.Log(str);
+        //}
 
         AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
         buildMap[0].assetBundleName = Path.GetFileName(path);

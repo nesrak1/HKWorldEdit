@@ -20,6 +20,7 @@ https://www.youtube.com/watch?v=8hLyvyG6M4Q
 * Delete the other generated files (HKWEDiffs, HKWEDiffs.manifest, levelxxx.manifest)
 * Make sure the mod is installed and start the game. The level is automatically patched when loaded
 
-### Bugs
+### Screenshots
 
-There are going to probably be a lot of bugs in the editor and mod. After the features have been implemented into the mod, the code will be cleaned up.
+![Kingdom's Edge](https://user-images.githubusercontent.com/12544505/56695718-4ede1d00-66af-11e9-84df-db097371f862.png)
+![Fog Canyon](https://user-images.githubusercontent.com/12544505/56695721-51407700-66af-11e9-957d-1ff9ff6483b9.png)

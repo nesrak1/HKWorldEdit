@@ -66,16 +66,29 @@ public class HKScene
     [MenuItem("HKEdit/Add EditDiffer %g", priority = 33)]
     public static void AddEditDiffer()
     {
-        if (Selection.activeGameObject != null)
+        //if (Selection.activeGameObject != null)
+        //{
+        //    GameObject obj = Selection.activeGameObject;
+        //    EditDiffer differ = obj.GetComponent<EditDiffer>();
+        //    if (differ == null)
+        //    {
+        //        differ = obj.AddComponent<EditDiffer>();
+        //    }
+        //    differ.pathId = differ.NextPathID();
+        //    differ.newAsset = true;
+        //}
+        foreach (GameObject obj in Selection.gameObjects)
         {
-            GameObject obj = Selection.activeGameObject;
-            EditDiffer differ = obj.GetComponent<EditDiffer>();
-            if (differ == null)
+            if (obj != null)
             {
-                differ = obj.AddComponent<EditDiffer>();
+                EditDiffer differ = obj.GetComponent<EditDiffer>();
+                if (differ == null)
+                {
+                    differ = obj.AddComponent<EditDiffer>();
+                }
+                differ.pathId = differ.NextPathID();
+                differ.newAsset = true;
             }
-            differ.pathId = differ.NextPathID();
-            differ.newAsset = true;
         }
     }
 
@@ -179,7 +192,7 @@ public class HKScene
         bundle = AssetBundle.LoadFromMemory(bundleData);
         EditorUtility.DisplayProgressBar("HKEdit", "Loading scene", 50);
 
-        File.WriteAllBytes("hkwedebug.unity3d", bundleData);
+        //File.WriteAllBytes("hkwedebug.unity3d", bundleData);
 
         //assetMap = GetAssetMap(am, bundle);
 
@@ -313,44 +326,44 @@ public class HKScene
                 sr.sortingOrder = baseField.Get("m_SortingOrder").GetValue().AsInt();
                 sr.sprite = spriteInstance;
 
-                //AssetTypeValueField m_Materials = baseField.Get("m_Materials").Get("Array");
-                //if (m_Materials.GetValue().AsArray().size > 0)
-                //{
-                //    AssetTypeValueField m_Material = m_Materials[0];
-                //
-                //    int matFileId = m_Material.Get("m_FileID").GetValue().AsInt();
-                //    long matPathId = m_Material.Get("m_PathID").GetValue().AsInt64();
-                //
-                //    AssetsFileInstance materialInst;
-                //    if (m_Material.Get("m_FileID").GetValue().AsInt() == 0)
-                //        materialInst = assetsFileInstance;
-                //    else
-                //        materialInst = assetsFileInstance.dependencies[matFileId - 1];
-                //    if (assetMap.ContainsKey(new AssetID(Path.GetFileName(materialInst.path), matPathId)))
-                //    {
-                //        //Debug.Log("getting item " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
-                //        Material mat = bundleAssets[assetMap[new AssetID(Path.GetFileName(materialInst.path), matPathId)]] as Material;
-                //        if (mat.shader.name != "Sprites/Lit") //honestly this shader confuses me. it is the only shader
-                //        {                                     //with no code and only references the generic material
-                //            sr.material = mat;
-                //        }
-                //        //else
-                //        //{
-                //        //    mat.shader = sr.sharedMaterial.shader;
-                //        //    sr.sharedMaterial = mat;
-                //        //}
-                //        if (mat.shader.name == "Hollow Knight/Grass-Default")
-                //        {
-                //            sr.sharedMaterial.SetFloat("_SwayAmount", 0f); //stops grass animation
-                //        }
-                //    }
-                //    else
-                //    {
-                //        //Debug.Log("failed to find " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
-                //    }
-                //}
-                ////spriteInstance.bounds.SetMinMax(new Vector3(0, 0), new Vector3(50, 50));
-                ////Debug.Log(spriteInstance.bounds.extents.x + "," + spriteInstance.bounds.extents.y + "," + spriteInstance.bounds.extents.z);
+                AssetTypeValueField m_Materials = baseField.Get("m_Materials").Get("Array");
+                if (m_Materials.GetValue().AsArray().size > 0)
+                {
+                    AssetTypeValueField m_Material = m_Materials[0];
+                
+                    int matFileId = m_Material.Get("m_FileID").GetValue().AsInt();
+                    long matPathId = m_Material.Get("m_PathID").GetValue().AsInt64();
+                
+                    AssetsFileInstance materialInst;
+                    if (m_Material.Get("m_FileID").GetValue().AsInt() == 0)
+                        materialInst = assetsFileInstance;
+                    else
+                        materialInst = assetsFileInstance.dependencies[matFileId - 1];
+                    if (assetMap.ContainsKey(new AssetID(Path.GetFileName(materialInst.path), matPathId)))
+                    {
+                        //Debug.Log("getting item " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
+                        Material mat = bundleAssets[assetMap[new AssetID(Path.GetFileName(materialInst.path), matPathId)]] as Material;
+                        if (mat.shader.name != "Sprites/Lit") //honestly this shader confuses me. it is the only shader
+                        {                                     //with no code and only references the generic material
+                            sr.material = mat;
+                        }
+                        //else
+                        //{
+                        //    mat.shader = sr.sharedMaterial.shader;
+                        //    sr.sharedMaterial = mat;
+                        //}
+                        if (mat.shader.name == "Hollow Knight/Grass-Default" || mat.shader.name == "Hollow Knight/Grass-Diffuse")
+                        {
+                            sr.sharedMaterial.SetFloat("_SwayAmount", 0f); //stops grass animation
+                        }
+                    }
+                    else
+                    {
+                        //Debug.Log("failed to find " + Path.GetFileName(materialInst.path) + "/" + matPathId + ".dat");
+                    }
+                }
+                //spriteInstance.bounds.SetMinMax(new Vector3(0, 0), new Vector3(50, 50));
+                //Debug.Log(spriteInstance.bounds.extents.x + "," + spriteInstance.bounds.extents.y + "," + spriteInstance.bounds.extents.z);
                 break;
             }
             if (component.info.curFileType == MONOBEHAVIOUR)
@@ -381,10 +394,18 @@ public class HKScene
                         AssetsFileInstance spriteFileInstance = assetsFileInstance.dependencies[fileId - 1];
                         //AssetTypeValueField spriteBaseField = Util.GetMonoBaseField(am, spriteFileInstance.file, sprite.info, Path.GetDirectoryName(assetsFileInstance.path));
                         AssetTypeValueField spriteBaseField = am.GetMonoBaseFieldCached(spriteFileInstance, sprite.info, managedPath);
-                        
+
+                        //this is a bad hack but it works for some reason so here it is
+                        //the reason the pivot is being set and not the actual position
+                        //is so we don't modify the values on the transform component
                         Texture2D image = spriteLoader.LoadTK2dSpriteNative(am, spriteBaseField, spriteFileInstance, _spriteId);
 
-                        Sprite spriteInstance = Sprite.Create(image, new Rect(0, 0, image.width, image.height), new Vector2(0.5f, 0.5f), 100f);
+                        AssetTypeValueField boundsData = spriteBaseField.Get("spriteDefinitions")[(uint)_spriteId].Get("boundsData")[0];
+                        float xOff = boundsData.Get("x").GetValue().AsFloat() * 100;
+                        float yOff = boundsData.Get("y").GetValue().AsFloat() * 100;
+
+                        Vector2 offset = new Vector2((image.width / 2f - xOff) / image.width, (image.height / 2f - yOff) / image.height);
+                        Sprite spriteInstance = Sprite.Create(image, new Rect(0, 0, image.width, image.height), offset, 100f);
                         SpriteRenderer sr = gameObjectInstance.AddComponent<SpriteRenderer>();
                         sr.sortingLayerName = "Default";
                         sr.sortingOrder = 0;

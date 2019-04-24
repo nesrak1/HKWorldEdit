@@ -33,16 +33,27 @@ public class EditDifferEditor : Editor
             newAssetLabel = new GUIContent("New Asset?");
         }
         
-        if (!Application.isPlaying)
+        //if (!Application.isPlaying)
+        //{
+        //    EditDiffer differ = (EditDiffer)target;
+        //    if (differ.newAsset)
+        //    {
+        //        EditDiffer.lastId = differ.pathId;
+        //    }
+        //    else
+        //    {
+        //        EditDiffer.lastId = 0;
+        //    }
+        //}
+    }
+
+    public void OnSceneGUI()
+    {
+        if (Event.current != null)// && Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Delete)
         {
-            EditDiffer differ = (EditDiffer)target;
-            if (differ.newAsset)
+            if (Event.current.commandName == "Delete" || Event.current.commandName == "SoftDelete")
             {
-                EditDiffer.lastId = differ.pathId;
-            }
-            else
-            {
-                EditDiffer.lastId = 0;
+                EditDiffer.usedIds.Remove(((EditDiffer)target).pathId);
             }
         }
     }
@@ -64,15 +75,25 @@ public class EditDifferEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    public void OnDestroy()
-    {
-        if (Application.isPlaying)
-            return;
-        if ((EditDiffer)target == null && EditDiffer.lastId != 0)
-        {
-            Debug.Log("Freed ID " + EditDiffer.lastId);
-            EditDiffer.usedIds.Remove(EditDiffer.lastId);
-            EditDiffer.lastId = 0;
-        }
-    }
+    //public void OnDestroy()
+    //{
+    //    if (Application.isPlaying)
+    //        return;
+    //    if ((EditDiffer)target == null && EditDiffer.lastId != 0)
+    //    {
+    //        Debug.Log("Freed ID " + EditDiffer.lastId);
+    //        EditDiffer.usedIds.Remove(EditDiffer.lastId);
+    //        EditDiffer.lastId = 0;
+    //    }
+    //}
+    //public void OnDestroy()
+    //{
+    //    if (Application.isPlaying)
+    //        return;
+    //    if ((EditDiffer)target == null)
+    //    {
+    //        
+    //        //EditDiffer.usedIds.Remove()
+    //    }
+    //}
 }
