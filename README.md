@@ -15,7 +15,7 @@ https://www.youtube.com/watch?v=8hLyvyG6M4Q
 * Open the levelxxx file in hollow_knight_Data
 * Edit the scene
 * Any time you add a new sprite into the scene, mark it to be added by pressing ctrl+g on it or going to `HKEdit->Add EditDiffer`
-* Go to `HKEdit->Save Level`
+* Go to `HKEdit->Save Level` and save it in the HKWEDiffs folder (see below) as levelxxx where xxx is the number of level. (If picking from the named list, it will be in parenthesis by the name, otherwise use the original file name)
 * In the Hollow Knight root dir, if HKWEDiffs folder does not exist, create it and save it in that folder with the same name as the level you opened
 * Delete the other generated files (HKWEDiffs, HKWEDiffs.manifest, levelxxx.manifest)
 * Make sure the mod is installed and start the game. The level is automatically patched when loaded
