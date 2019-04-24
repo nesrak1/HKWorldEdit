@@ -63,7 +63,7 @@ public class HKScene
         }
     }
 
-    [MenuItem("HKEdit/Add EditDiffer %r", priority = 33)]
+    [MenuItem("HKEdit/Add EditDiffer %g", priority = 33)]
     public static void AddEditDiffer()
     {
         if (Selection.activeGameObject != null)

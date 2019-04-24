@@ -160,7 +160,7 @@ public class HKSave
         {
             EditDiffer ed = go.GetComponent<EditDiffer>();
             string pName = "Assets/ABTemp/HKWEA_" + go.name.Substring(0, Math.Min(go.name.Length, 8)) + "_" + ed.fileId + "_" + ed.origPathId + "_" + ed.pathId + ".prefab";
-            Debug.Log("creating asset " + pName);
+            //Debug.Log("creating asset " + pName);
             GameObject pgo = PrefabUtility.CreatePrefab(pName, go, ReplacePrefabOptions.Default);
             PrefabUtility.DisconnectPrefabInstance(go);
             UnityEngine.Object.DestroyImmediate(pgo.GetComponent<EditDiffer>(), true);
@@ -182,7 +182,27 @@ public class HKSave
         buildMap[0].assetNames = buildAssets.ToArray();
         BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(path), buildMap, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows64);
 
+        DecompressBundle(path);
+        File.Delete(path);
+        File.Move(path + ".up", path);
+		
         //File.Delete(dataPath);
+    }
+
+    private void DecompressBundle(string path)
+    {
+        //from uabe
+        AssetsFileReader reader = new AssetsFileReader(new FileStream(path, FileMode.Open));
+        AssetsBundleFile bundle = new AssetsBundleFile();
+        bundle.Read(reader, true);
+        reader.Position = 0;
+        AssetsFileWriter writer = new AssetsFileWriter(new FileStream(path + ".up", FileMode.Create));
+        bundle.Unpack(reader, writer);
+        //writer.BaseStream.Position = 0;
+        //bundle = new AssetsBundleFile();
+        //bundle.Read(new AssetsFileReader(writer.BaseStream), false);
+        reader.BaseStream.Close();
+        writer.BaseStream.Close();
     }
 
     //fast transform compare since most
